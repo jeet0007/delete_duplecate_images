@@ -13,22 +13,56 @@ A Python tool to find and remove duplicate images from your folders. It supports
 - Comprehensive error handling
 - Progress tracking with detailed feedback
 
-## Architecture
+## System Requirements
 
-The application follows the Model-View-Controller (MVC) pattern:
-- **Models**: Core business logic for image processing and duplicate detection
-- **Views**: Component-based GUI with modular design
-- **Controllers**: Coordination between models and views, handling user interactions
+### Supported Platforms
+- macOS (10.15+)
+- Linux (Ubuntu 20.04+)
+- Windows 10/11
+
+### Prerequisites
+- Python 3.9+
+- pip
+- Homebrew (macOS)
+- libheif
+- cairo graphics library
 
 ## Installation
 
-1. Clone this repository:
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/yourusername/delete_duplicate_images.git
 cd delete_duplicate_images
 ```
 
-2. Install the required dependencies:
+### 2. Create Virtual Environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
+```
+
+### 3. Install System Dependencies
+
+#### macOS
+```bash
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install system libraries
+brew install libheif cairo pkg-config
+```
+
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt-get update
+sudo apt-get install -y libheif-dev libcairo2-dev pkg-config
+```
+
+#### Windows
+- Download and install [HEIF Image Extensions](https://apps.microsoft.com/detail/9PMMBL1CTSB3) from Microsoft Store
+- Install [Cairo Graphics Library](https://www.cairographics.org/download/)
+
+### 4. Install Python Dependencies
 ```bash
 pip install -r requirements.txt
 ```
@@ -49,15 +83,36 @@ python -m src --folder /path/to/folder
 - `--gui`: Launch the graphical user interface
 - `--folder`: Specify the folder path to scan (required in CLI mode)
 
-## How it Works
+## HEIC/HEIF Support
 
-The tool uses perceptual hashing to identify visually similar images. This means it can detect duplicates even if they have:
-- Different file names
-- Different resolutions
-- Minor modifications
-- Different formats
+### What are HEIC/HEIF Files?
+HEIC (High Efficiency Image Container) is a modern image format used by Apple devices, offering superior compression compared to JPEG.
 
-### Components
+### Compatibility
+- Fully supported on macOS
+- Requires additional libraries on Linux and Windows
+- Processed using `pillow-heif` library
+
+### Troubleshooting HEIC Support
+- Ensure `libheif` is installed
+- Verify `pillow-heif` is correctly installed
+- Check system library paths
+- Update to the latest version of the application
+
+## Performance and Limitations
+
+- Large folders may take longer to process
+- Memory usage scales with number of images
+- Recommended: Process folders with less than 10,000 images at a time
+
+## Architecture
+
+The application follows the Model-View-Controller (MVC) pattern:
+- **Models**: Core business logic for image processing and duplicate detection
+- **Views**: Component-based GUI with modular design
+- **Controllers**: Coordination between models and views, handling user interactions
+
+## Components
 
 1. **Image Finder (Model)**
    - Handles image processing and hash computation
@@ -78,37 +133,13 @@ The tool uses perceptual hashing to identify visually similar images. This means
    - Handles background processing
    - Manages state and updates
 
-## System Dependencies
-
-### macOS
-For HEIC image support on macOS, install the following system dependencies using Homebrew:
-```bash
-brew install libheif libffi
-```
-
-### Linux
-For HEIC image support on Linux (Ubuntu/Debian):
-```bash
-sudo apt-get install libheif-dev libffi-dev
-```
-
-### Windows
-For Windows, the required DLLs are bundled with the application.
-
-## Troubleshooting
-
-### HEIC File Support
-If you encounter issues with HEIC files:
-1. Ensure system dependencies are installed (see above)
-2. Reinstall pillow-heif with the latest version:
-```bash
-pip uninstall pillow-heif -y
-pip install pillow-heif
-```
-
 ## Contributing
 
-Feel free to open issues or submit pull requests to improve the tool.
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 

@@ -1,8 +1,16 @@
-Pillow>=9.5.0
-pillow-heif>=0.13.0
+# Core dependencies
+Pillow==11.0.0
+pillow-heif==0.20.0
 tqdm>=4.65.0
-customtkinter>=5.2.0
+
+# GUI Framework
 customtkinter==5.2.2
-pillow==11.0.0
-pillow-heif==0.15.0
+
+# SVG Support
 cairosvg==2.7.1
+
+# Type Hints
+typing-extensions>=4.0.0
+
+# Logging
+rich>=13.0.0
