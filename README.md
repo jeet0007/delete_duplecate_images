@@ -78,6 +78,34 @@ The tool uses perceptual hashing to identify visually similar images. This means
    - Handles background processing
    - Manages state and updates
 
+## System Dependencies
+
+### macOS
+For HEIC image support on macOS, install the following system dependencies using Homebrew:
+```bash
+brew install libheif libffi
+```
+
+### Linux
+For HEIC image support on Linux (Ubuntu/Debian):
+```bash
+sudo apt-get install libheif-dev libffi-dev
+```
+
+### Windows
+For Windows, the required DLLs are bundled with the application.
+
+## Troubleshooting
+
+### HEIC File Support
+If you encounter issues with HEIC files:
+1. Ensure system dependencies are installed (see above)
+2. Reinstall pillow-heif with the latest version:
+```bash
+pip uninstall pillow-heif -y
+pip install pillow-heif
+```
+
 ## Contributing
 
 Feel free to open issues or submit pull requests to improve the tool.
