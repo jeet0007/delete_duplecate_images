@@ -4,7 +4,7 @@ Image finder model that handles the core business logic for finding and managing
 from pathlib import Path
 from PIL import Image
 from collections import defaultdict
-import hashlib
+import numpy as np
 from typing import List, Dict, Tuple, Callable, Optional, Union, Iterator
 from dataclasses import dataclass
 from pillow_heif import register_heif_opener
@@ -23,6 +23,7 @@ class ImageFinder:
     
     SUPPORTED_FORMATS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.heic', '.heif'}
     BATCH_SIZE = 100  # Process images in batches of 100
+    HASH_SIZE = 8  # Size of the perceptual hash (8x8 pixels)
     
     def __init__(self):
         self.image_hashes: Dict[str, List[Path]] = defaultdict(list)
@@ -53,18 +54,33 @@ class ImageFinder:
         return file_path.suffix.lower() in self.SUPPORTED_FORMATS
 
     def compute_image_hash(self, image_path: Path) -> Optional[str]:
-        """Compute perceptual hash for an image."""
+        """
+        Compute perceptual hash for an image using average hash algorithm.
+        More efficient than MD5 and better at finding visually similar images.
+        """
         try:
             with Image.open(image_path) as img:
-                # Convert to RGB if necessary
-                if img.mode != 'RGB':
-                    img = img.convert('RGB')
-                # Resize to thumbnail for faster comparison
-                img.thumbnail((100, 100))
-                # Get image data as bytes
-                img_data = img.tobytes()
-                # Compute MD5 hash
-                return hashlib.md5(img_data).hexdigest()
+                # Convert to grayscale and resize in one step
+                # Using NEAREST resampling for speed, and small size for memory efficiency
+                img = img.convert('L').resize((self.HASH_SIZE + 1, self.HASH_SIZE + 1), 
+                                            Image.Resampling.NEAREST)
+                
+                # Calculate average value - using numpy for efficiency
+                pixels = np.array(img)
+                avg = pixels.mean()
+                
+                # Compute hash - each bit represents whether pixel is above average
+                diff = pixels > avg
+                # Convert boolean array to hash string
+                # Using ravel() is faster than flatten()
+                hash_bits = ''.join(str(int(b)) for b in diff.ravel())
+                
+                # Convert to hexadecimal for shorter string
+                hash_int = int(hash_bits, 2)
+                hash_hex = f"{hash_int:016x}"
+                
+                return hash_hex
+                
         except Exception as e:
             self.errors.append(f"Error processing {image_path.name}: {str(e)}")
             return None
@@ -100,8 +116,9 @@ class ImageFinder:
             # Process each file in the batch
             for file in batch:
                 try:
-                    hash_val = self._calculate_image_hash(file)
-                    self.image_hashes[hash_val].append(file)
+                    hash_val = self.compute_image_hash(file)
+                    if hash_val:  # Only add if hash computation succeeded
+                        self.image_hashes[hash_val].append(file)
                 except Exception as e:
                     self.errors.append(f"Error processing {file}: {e}")
                 
@@ -121,10 +138,8 @@ class ImageFinder:
         return duplicate_groups
 
     def _get_image_files(self, folder: Path) -> List[Path]:
+        """Get all supported image files in the folder."""
         return [f for f in folder.rglob('*') if self.is_supported_image(f)]
-
-    def _calculate_image_hash(self, file: Path) -> str:
-        return self.compute_image_hash(file)
 
     def delete_duplicates(self, duplicates: List[ImageGroup], keep_original: bool = True) -> List[Path]:
         """
