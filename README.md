@@ -101,6 +101,8 @@ HEIC (High Efficiency Image Container) is a modern image format used by Apple de
 
 ## Performance and Limitations
 
+- Image processing is single-threaded for stability
+- GUI operations run in a separate thread to maintain responsiveness
 - Large folders may take longer to process
 - Memory usage scales with number of images
 - Recommended: Process folders with less than 10,000 images at a time
@@ -117,19 +119,16 @@ The application follows the Model-View-Controller (MVC) pattern:
 1. **Image Finder (Model)**
    - Handles image processing and hash computation
    - Manages duplicate detection logic
-   - Provides progress tracking
-   - Handles errors gracefully
+   - Provides progress updates
 
 2. **GUI View**
-   - Folder selection component
-   - Action buttons for scan/delete
-   - Results display with thumbnails
-   - Progress visualization
-   - Error reporting
+   - Modern user interface with CustomTkinter
+   - Real-time progress updates
+   - Interactive duplicate preview
+   - Folder selection and navigation
 
 3. **Controller**
-   - Manages user interactions
-   - Coordinates between model and view
+   - Manages application flow
    - Handles background processing
    - Manages state and updates
 
